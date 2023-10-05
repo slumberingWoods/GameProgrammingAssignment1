@@ -14,14 +14,14 @@ public class CharacterMovement : MonoBehaviour
     private CharacterController controller;
     private float walkSpeed = 5;
     private float runSpeed = 8;
-    private bool doubleJump = false;
-    public Animator animator;
-    
+    private Animator animator;
+    public GameObject followTarget;
  
     private void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
     public void Update()
@@ -32,14 +32,31 @@ public class CharacterMovement : MonoBehaviour
     void UpdateRotation()
     {
         transform.Rotate(0, Input.GetAxis("Mouse X")* mouseSensitivy, 0, Space.Self);
- 
+        followTarget.transform.rotation *= Quaternion.AngleAxis(Input.GetAxis("Mouse Y") * mouseSensitivy, Vector3.right);
+        var angles = followTarget.transform.localEulerAngles;
+        angles.z = 0;
+
+        var angle = followTarget.transform.localEulerAngles.x;
+
+        if (angle > 160 && angle < 300) {
+            angles.x = 300;
+        }
+        else if(angle < 160 && angle > 40) {
+            angles.x = 40;
+        }
+
+        followTarget.transform.localEulerAngles = angles;
+
+        transform.rotation = Quaternion.Euler(0, followTarget.transform.rotation.eulerAngles.y, 0);
+
+        followTarget.transform.localEulerAngles = new Vector3(angles.x, 0, 0);
     }
 
     void ProcessMovement()
     { 
         // Moving the character forward according to the speed
         float speed = GetMovementSpeed();
- 
+        
         // Get the camera's forward and right vectors
         Vector3 cameraForward = Camera.main.transform.forward;
         Vector3 cameraRight = Camera.main.transform.right;
@@ -61,24 +78,21 @@ public class CharacterMovement : MonoBehaviour
         groundedPlayer = controller.isGrounded;
         if (groundedPlayer)
         {
-            doubleJump = false;
             animator.SetBool("isJumping", false);
             animator.SetBool("isGrounded", true);
             animator.SetBool("isDoubleJump", false);
-            if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0) {
-                if(Input.GetButton("Shift")) {
-                    animator.SetBool("isRunning", true);
-                    animator.SetBool("isWalking", false);
+            if (movement != Vector3.zero) {
+                if (GetMovementSpeed() == runSpeed) {
+                    animator.SetFloat("Speed", 1.0f);
                 } else {
-                    animator.SetBool("isRunning", false);
-                    animator.SetBool("isWalking", true);
+                    animator.SetFloat("Speed", 0.49f);
                 }
             } else {
-                animator.SetBool("isWalking", false);
-                animator.SetBool("isRunning", false);
+                animator.SetFloat("Speed", 0.0f);
             }
             if (Input.GetButtonDown("Jump"))
             {
+                animator.SetBool("noJump", true);
                 animator.SetBool("isGrounded", false);
                 gravity.y += Mathf.Sqrt(jumpHeight * -5.0f * gravityValue);
                 animator.SetBool("isJumping", true);
@@ -91,11 +105,12 @@ public class CharacterMovement : MonoBehaviour
         }
         else
         {
-            if(doubleJump == false && Input.GetButtonDown("Jump"))
+            animator.SetBool("isGrounded", false);
+            if(GameManager.Instance.doubleJump == true && Input.GetButtonDown("Jump"))
             {
-                doubleJump = true;
                 animator.SetBool("isDoubleJump", true);
-                gravity.y += Mathf.Sqrt(jumpHeight * -5.0f * gravityValue);
+                gravity.y += Mathf.Sqrt((jumpHeight + 2.0f) * -5.0f * gravityValue );
+                GameManager.Instance.ResetJump();
             }
             // Since there is no physics applied on character controller we have this applies to reapply gravity
             gravity.y += gravityValue * Time.deltaTime;
@@ -107,12 +122,14 @@ public class CharacterMovement : MonoBehaviour
 
     float GetMovementSpeed()
     {
-        if (Input.GetButton("Fire3"))// Left shift
+        if (Input.GetButton("Shift"))// Left shift
         {
+            animator.SetFloat("Speed", 1.0f);
             return runSpeed;
         }
         else
         {
+            animator.SetFloat("Speed", 0.4f);
             return walkSpeed;
         }
     }
