@@ -109,7 +109,7 @@ public class CharacterMovement : MonoBehaviour
             if(GameManager.Instance.doubleJump == true && Input.GetButtonDown("Jump"))
             {
                 animator.SetBool("isDoubleJump", true);
-                gravity.y += Mathf.Sqrt((jumpHeight + 2.0f) * -5.0f * gravityValue );
+                gravity.y += Mathf.Sqrt((jumpHeight + 1.0f) * -5.0f * gravityValue );
                 GameManager.Instance.ResetJump();
             }
             // Since there is no physics applied on character controller we have this applies to reapply gravity

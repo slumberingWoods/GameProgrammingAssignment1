@@ -5,7 +5,7 @@ using UnityEngine;
 public class DoubleJumpCube : MonoBehaviour
 {
     float duration = 15.0f;
-    float recreateDuration = 20.0f;
+    float recreateDuration = 8.0f;
     public GameObject DoubleJumpParticle;
     public void OnTriggerEnter(Collider collision) {
         if (collision.tag == "Player") {

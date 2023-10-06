@@ -52,4 +52,7 @@ public class GameManager : MonoBehaviour
     public static void ResetScore() {
         score = levelScore;
     }
+    public static void ReturnToStart() {
+        SceneManager.LoadScene(0);
+    }
 }
