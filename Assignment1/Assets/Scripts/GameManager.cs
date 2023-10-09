@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
         score = levelScore;
     }
     public static void ReturnToStart() {
+        score = 0;
         SceneManager.LoadScene(0);
     }
     public static void EndGame() {
