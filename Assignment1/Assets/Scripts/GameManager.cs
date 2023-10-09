@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
     }
     public static void ReturnToStart() {
         score = 0;
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(1);
     }
     public static void EndGame() {
         Application.Quit();
